@@ -1,0 +1,174 @@
+//Kevan Rayner CPA Personal Project Pong
+//Classic game of 1 on 1 PONG
+
+package {
+
+	import flash.display.MovieClip;
+	import flash.display.Stage;
+	import flash.events.Event;
+	import flash.events.KeyboardEvent;
+	import flash.events.TimerEvent;
+	import flash.ui.Keyboard;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import flash.utils.Timer;
+	
+
+	public class FirstTimeClass extends MovieClip {
+
+		private var _keys: Object = {};
+		private var player1: aPaddle = new aPaddle();
+		private var player2: aPaddle = new aPaddle();
+		private var doug: theBall = new theBall();
+		
+		public var counter: int = 0;
+		public var xspeed: int = 3;
+		public var yspeed: int = 3;
+		public var thespeed: int = 3;
+		
+		private var p1Field:TextField;
+		private var p1Score:uint = 0;
+		private var p2Field:TextField;
+		private var p2Score:uint = 0;
+		
+		private var theFormat:TextFormat = new TextFormat();
+		
+
+		public function FirstTimeClass() { // Main
+			// constructor code
+			if (stage) init();
+			else addEventListener(Event.ADDED_TO_STAGE, init);
+
+
+			trace("Hello World");
+
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		}
+		private function init(e: Event = null): void {
+			removeEventListener(Event.ADDED_TO_STAGE, init);
+
+			stage.addChild(player1); //  Paddle 1
+			player1.x = 545;
+			player1.y = 200;
+			stage.addChild(player2); // Paddle 2
+			player2.x = 5;
+			player2.y = 200;
+			stage.addChild(doug);
+			doug.x = 200;
+			doug.y = 200;
+			
+			theFormat.size = 25;
+			p1Field = new TextField();
+			p2Field = new TextField();
+			
+ 			p1Field.x = 50;
+ 			p1Field.y = 5;
+ 			//p1Field.width = 500;
+			//p1Field.height = 90;
+ 			p1Field.text = p1Score.toString();
+			p1Field.defaultTextFormat = theFormat;
+			
+			p2Field.x = 500;
+ 			p2Field.y = 5;
+ 			//p2Field.width = 500;
+			//p2Field.height = 90;
+ 			p2Field.text = p2Score.toString();
+			p2Field.defaultTextFormat = theFormat;
+			
+			
+			stage.addChild(p1Field);
+			stage.addChild(p2Field);
+			
+
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			//stage.addEventListener(KeyboardEvent.KEY_DOWN, reportKeyDown);
+
+		}
+		private function onKeyDown(e: KeyboardEvent): void {
+			_keys[e.keyCode] = true;
+			//trace("You pushed");
+		}
+
+		private function onKeyUp(e: KeyboardEvent): void {
+			_keys[e.keyCode] = false;
+		}
+
+		private function onEnterFrame(e: Event): void {
+			// Player 1 Controls
+			if (_keys[Keyboard.UP]) { if (player1.y != 60) { player1.y -= 5; } }
+			if (_keys[Keyboard.DOWN]) { if (player1.y != 370) { player1.y += 5; } }
+			
+			//Player2 Controls
+			if (_keys[Keyboard.W]) { if (player2.y != 60) { player2.y -= 5; } }
+			if (_keys[Keyboard.S]) { if (player2.y != 370) { player2.y += 5;} }
+			
+			// Set the speed of the ball
+			doug.x += xspeed;
+			doug.y += yspeed;
+
+			if (doug.x <= 0) // Hits left side wall
+			{
+				p2Score += 1;
+				doug.x = 200;
+				doug.y = 200;
+				xspeed = thespeed;
+				yspeed = thespeed;
+			}
+			if (doug.x >= 550) // Hits right side wall
+			{
+				p1Score += 1;
+				doug.x = 300;
+				doug.y = 200;
+				xspeed = thespeed;
+				yspeed = thespeed;
+			}
+			
+			
+			if (doug.y >= 400 || doug.y <= 60){ yspeed *= -1; } // Hits top or bottom of screen
+			
+			if(player1.hitTestObject(doug) == true ){
+				xspeed *= -1; 
+				delayedFunctionCall(100, function(e:Event) {speedUpPlayer1();});
+				} // Ball hits player 1
+			if(player2.hitTestObject(doug) == true ){
+				xspeed *= -1; 
+				delayedFunctionCall(100, function(e:Event) {speedUpPlayer2();});
+				} // Ball hits player 2
+
+		//-------------------------------------------------------------------------
+		p1Field.text = p1Score.toString();
+		p2Field.text = p2Score.toString();
+
+		}
+
+		function reportKeyDown(event:KeyboardEvent):void { 
+		trace("Key Pressed: " + String.fromCharCode(event.charCode) +         " (character code: " + event.charCode + ")"); 
+		} 
+		
+		
+		//-------------------------------------------------------------------------
+		// Testing the ability to to wait before speeding up the ball
+		// To fix the paddle hitting bug
+		function delayedFunctionCall(delay:int, func:Function) {
+			trace("going to execute the function you passed me in", delay, "milliseconds");
+			var timer:Timer = new Timer(delay, 1);
+			timer.addEventListener(TimerEvent.TIMER, func);
+			timer.start();
+		}
+		
+		// Fxn to add speed to the balls direction
+		function speedUpPlayer1() :void {
+			xspeed = xspeed - 3;
+		}
+		function speedUpPlayer2() :void {
+			xspeed = xspeed + 3;
+		}
+		
+	}
+
+
+}
